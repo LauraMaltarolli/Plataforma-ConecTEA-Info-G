@@ -54,6 +54,10 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--light-bg) !important; /* Um leve destaque no hover */
 }
 
+.navbar-collapse {
+    flex-grow: 0.5;
+}
+
 /* Hero Section */
 .hero-section {
     background-color: var(--light-blue-bg);
@@ -238,5 +242,11 @@ h1, h2, h3, h4, h5, h6 {
 @media (min-width: 1500px) {
     .container, .container-lg, .container-md, .container-sm, .container-xl {
         max-width: 1500px;
+    }
+}
+
+@media (min-width: 1500px) {
+    .navbar .container {
+        max-width: 2000px;
     }
 }

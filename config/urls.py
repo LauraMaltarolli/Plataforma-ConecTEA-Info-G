@@ -18,11 +18,20 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from app.views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', IndexView.as_view(), name='index'),
     path('rotinas/', RotinaListView.as_view(), name='rotina_list'),
+    path('rotinas/criar/', RotinaCreateView.as_view(), name='rotina_create'),
+    path('rotinas/<int:pk>/update/', RotinaUpdateView.as_view(), name='rotina_update'),
+    path('rotinas/<int:pk>/delete/', RotinaDeleteView.as_view(), name='rotina_delete'),
+    path('rotinas/<int:pk>/', RotinaDetailView.as_view(), name='rotina_detail'),
+    path('rotinas/<int:pk>/add-item/', ItemRotinaCreateView.as_view(), name='item_create'),
+    path('itens/<int:pk>/delete/', ItemRotinaDeleteView.as_view(), name='item_delete'),
+    path('rotinas/salvar-ordem-itens/', SalvarOrdemItensView.as_view(), name='salvar_ordem_itens'),
     path('comunidade/', PostagemListView.as_view(), name='postagem_list'),
     path('guias/', GuiaInformativoListView.as_view(), name='guia_list'),
     path('pecs/', PECsView.as_view(), name='pecs'),
@@ -30,6 +39,9 @@ urlpatterns = [
     path('modo-crise/', ModoCriseView.as_view(), name='modo_crise'),
     
     # URLs de Autenticação
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='app:index'), name='logout'),
+    path('cadastro/', CadastroView.as_view(), name='cadastro'),
+    path('login/', LoginView.as_view(), name='login'),  
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
