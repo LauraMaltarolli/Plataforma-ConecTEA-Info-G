@@ -35,6 +35,8 @@ urlpatterns = [
     path('comunidade/', PostagemListView.as_view(), name='postagem_list'),
     path('guias/', GuiaInformativoListView.as_view(), name='guia_list'),
     path('pecs/', PECsView.as_view(), name='pecs'),
+    path('pecs/<int:pk>/delete/', PECsDeleteView.as_view(), name='pecs_delete'),
+    path('pecs/<int:pk>/update/', PECsUpdateView.as_view(), name='pecs_update'),
     path('perfil/', PerfilApoioView.as_view(), name='perfil_apoio'),
     path('modo-crise/', ModoCriseView.as_view(), name='modo_crise'),
     

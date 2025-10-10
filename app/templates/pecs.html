@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar PECS - ConecTEA</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-hand-holding-heart mr-2"></i>ConecTEA</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'rotina_list' %}"><i class="fas fa-tasks mr-1"></i>Rotinas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'pecs' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'guia_list' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'postagem_list' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'perfil_apoio' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                        {% endif %}
+                    </ul>
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><span class="nav-link"><i class="fas fa-user mr-1"></i>Olá, {{ user.username }}</span></li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt mr-1"></i>Sair
+                                </a>
+                            </li>
+                            {% if user.is_superuser %}
+                                <li class="nav-item"><a class="nav-link" href="/admin/"><i class="fas fa-user-shield mr-1"></i>Admin</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt mr-1"></i>Entrar</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <main class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Meus Cartões PECS</h1>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Adicionar Novo Cartão de Comunicação</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="texto">Texto do Cartão</label>
+                                <input type="text" class="form-control" name="texto" placeholder="Ex: Eu quero..." required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="imagem">Imagem do Cartão</label>
+                                <input type="file" class="form-control-file" name="imagem" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Adicionar Cartão</button>
+                </form>
+            </div>
+        </div>
+        
+        <hr>
+<div class="row">
+            {% for pec in pecs_list %}
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card pecs-card h-100" data-toggle="modal" data-target="#pecsDetailModal"
+                         data-img-url="{{ pec.imagem.url }}"
+                         data-text="{{ pec.texto }}"
+                         data-delete-url="{% url 'pecs_delete' pk=pec.pk %}"
+                         data-update-url="{% url 'pecs_update' pk=pec.pk %}"
+                         data-owner="{{ pec.usuario.username }}"
+                         id="pecs-card-{{ pec.pk }}">
+                         
+                        <div class="pecs-card-img-container">
+                            <img src="{{ pec.imagem.url }}" class="pecs-card-img" alt="{{ pec.texto }}">
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-0">{{ pec.texto }}</h5>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p class="text-center">Você ainda não tem cartões PECS. Adicione o seu primeiro!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <div class="modal fade" id="pecsDetailModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <img src="" id="modal-pecs-img" class="pecs-modal-img mb-3" alt="">
+                    <h3 id="modal-pecs-text"></h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="open-edit-modal-btn">Editar</button>
+                    <button type="button" class="btn btn-danger" id="open-delete-confirm-btn">Excluir PECS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deletePecsConfirmModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir este cartão?</p>
+                </div>
+                <div class="modal-footer">
+                    <form id="delete-pecs-confirm-form" method="post" action="">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pecsEditModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form id="edit-pecs-form" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar Cartão PECS</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="edit-texto">Texto do Cartão</label>
+                            <input type="text" class="form-control" id="edit-texto" name="texto" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-imagem">Trocar Imagem (Opcional)</label>
+                            <input type="file" class="form-control-file" id="edit-imagem" name="imagem">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'modo_crise' %}" class="fab-crisis-button">
+        <i class="fas fa-exclamation-triangle fab-icon"></i>
+        <span class="fab-text">Modo Crise</span>
+    </a>
+
+
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2025 ConecTEA. Todos os direitos reservados. Design por Laura Maltarolli.</span>
+        </div>
+    </footer>
+    
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        const LOGGED_IN_USER = "{{ user.username }}";
+        const IS_SUPERUSER = {{ user.is_superuser|yesno:"true,false" }};
+    </script>
+    <script src="{% static 'js/pecs.js' %}"></script>
+</body>
+</html>

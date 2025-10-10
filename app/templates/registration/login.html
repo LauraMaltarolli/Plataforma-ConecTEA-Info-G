@@ -6,55 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ConecTEA</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: var(--light-blue-bg);
-        }
-        .login-card {
-            max-width: 450px;
-            width: 100%;
-            padding: 40px;
-            border-radius: 15px;
-            background-color: var(--white);
-            box-shadow: 0 10px 30px var(--shadow-hover);
-        }
-    </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2 class="text-center mb-4">Acessar ConecTEA</h2>
-        
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="{{ form.username.id_for_label }}">Nome de Usuário</label>
-                {{ form.username }}
+    <div class="auth-container">
+        <div class="auth-branding-side">
+            <div class="auth-branding-content">
+                <h1>ConecTEA</h1>
+                <p>Conectando para o bem-estar e o desenvolvimento.</p>
             </div>
-            <div class="form-group">
-                <label for="{{ form.password.id_for_label }}">Senha</label>
-                {{ form.password }}
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block mt-4">Entrar</button>
-        </form>
-        <div class="text-center mt-3">
-            <a href="{% url 'cadastro' %}">Ainda não tem uma conta? Cadastre-se</a>
         </div>
-        <div class="text-center mt-2">
-            <a href="{% url 'index' %}">Voltar para a página inicial</a>
+        <div class="auth-form-side">
+            <div class="auth-form-container">
+                <h2>Acessar Plataforma</h2>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group form-group-icon">
+                        <label for="{{ form.username.id_for_label }}">Nome de Usuário</label>
+                        <i class="fas fa-user fa-icon"></i>
+                        <input type="text" name="username" class="form-control" required id="{{ form.username.id_for_label }}">
+                    </div>
+                    <div class="form-group form-group-icon">
+                        <label for="{{ form.password.id_for_label }}">Senha</label>
+                        <i class="fas fa-lock fa-icon"></i>
+                        <input type="password" name="password" class="form-control" required id="{{ form.password.id_for_label }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block mt-4">Entrar</button>
+                </form>
+                <div class="text-center mt-4">
+                    <p>Ainda não tem uma conta? <a href="{% url 'cadastro' %}">Cadastre-se</a></p>
+                    <p><a href="{% url 'index' %}">Voltar para a página inicial</a></p>
+                </div>
+            </div>
         </div>
     </div>
 </body>

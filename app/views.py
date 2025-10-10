@@ -11,6 +11,10 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 import json
 from django.db import transaction
+from django.db.models import Q
+from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
+
 
 class IndexView(View):
     template_name = 'index.html'
@@ -177,7 +181,6 @@ class ItemRotinaCreateView(LoginRequiredMixin, View):
             'imagem_url': item.imagem.url if item.imagem else None,
         }, status=201)
 
-
 class ItemRotinaDeleteView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         item_id = kwargs.get('pk')
@@ -204,7 +207,7 @@ class SalvarOrdemItensView(LoginRequiredMixin, View):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-class PostagemListView(View):
+class PostagemListView(LoginRequiredMixin,View):
     template_name = 'postagem_list.html'
 
     def get(self, request, *args, **kwargs):
@@ -228,11 +231,96 @@ class PECsView(LoginRequiredMixin, View):
     template_name = 'pecs.html'
 
     def get(self, request, *args, **kwargs):
-        pecs_usuario = PECs.objects.filter(usuario=request.user)
+        Usuario = get_user_model()
+        
+        # Prepara a base da consulta para pegar os cartões do usuário logado e do usuário padrão
+        base_query = Q(usuario=request.user)
+        try:
+            usuario_padrao = Usuario.objects.get(username='usuario_padrao')
+            base_query |= Q(usuario=usuario_padrao)
+        except Usuario.DoesNotExist:
+            pass # Continua sem o usuário padrão se ele não for encontrado
+
+        # --- NOVA LÓGICA DE PERMISSÃO ---
+        if request.user.is_superuser:
+            # Se o usuário for um admin, busca TODOS os cartões (de crise ou não)
+            pecs_a_exibir = PECs.objects.filter(base_query).order_by('texto')
+        else:
+            # Se for um usuário normal, busca apenas os cartões que NÃO são de crise
+            pecs_a_exibir = PECs.objects.filter(base_query, is_crisis_card=False).order_by('texto')
+        
         context = {
-            'pecs_list': pecs_usuario,
+            'pecs_list': pecs_a_exibir
         }
         return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        # A lógica de criação de um novo cartão não muda.
+        texto = request.POST.get('texto')
+        imagem = request.FILES.get('imagem')
+
+        if texto and imagem:
+            PECs.objects.create(
+                usuario=request.user,
+                texto=texto,
+                imagem=imagem
+            )
+            messages.success(request, 'Cartão PECS pessoal adicionado com sucesso!')
+        else:
+            messages.error(request, 'Erro: Texto e imagem são obrigatórios.')
+        
+        return redirect('pecs')
+
+class PECsDeleteView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        pec = get_object_or_404(PECs, pk=pk)
+
+        # LÓGICA DE PERMISSÃO:
+        # Verifica se o usuário logado é o dono do cartão OU se é um superusuário (admin)
+        if pec.usuario == request.user or request.user.is_superuser:
+            pec.delete()
+            messages.success(request, 'Cartão PECS excluído com sucesso!')
+        else:
+            # Se não tiver permissão, gera um erro.
+            raise PermissionDenied("Você não tem permissão para excluir este cartão.")
+        
+        return redirect('pecs')
+
+class PECsUpdateView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        # Busca os dados do PECS para preencher o formulário de edição
+        pk = kwargs.get('pk')
+        pec = get_object_or_404(PECs, pk=pk)
+
+        # Verifica a permissão antes de enviar os dados
+        if not (pec.usuario == request.user or request.user.is_superuser):
+            raise PermissionDenied("Você não tem permissão para editar este cartão.")
+
+        data = { 'id': pec.id, 'texto': pec.texto, 'imagem_url': pec.imagem.url }
+        return JsonResponse(data)
+
+    def post(self, request, *args, **kwargs):
+        # Salva as alterações enviadas pelo formulário
+        pk = kwargs.get('pk')
+        pec = get_object_or_404(PECs, pk=pk)
+
+        # Verifica a permissão antes de salvar
+        if not (pec.usuario == request.user or request.user.is_superuser):
+            raise PermissionDenied("Você não tem permissão para editar este cartão.")
+
+        pec.texto = request.POST.get('texto', pec.texto)
+        if request.FILES.get('imagem'):
+            pec.imagem = request.FILES.get('imagem')
+        
+        pec.save()
+
+        return JsonResponse({
+            'status': 'success',
+            'id': pec.id,
+            'texto': pec.texto,
+            'imagem_url': pec.imagem.url
+        })
 
 class PerfilApoioView(LoginRequiredMixin, View):
     template_name = 'perfil_apoio.html'
@@ -260,6 +348,23 @@ class ModoCriseView(LoginRequiredMixin, View):
     template_name = 'modo_crise.html'
 
     def get(self, request, *args, **kwargs):
-        # A lógica para buscar mídias calmantes ou PECs de crise viria aqui
-        context = {}
+        Usuario = get_user_model()
+        crisis_pecs = PECs.objects.none()
+
+        try:
+            # Pega o usuário padrão para buscar os PECS de crise globais
+            usuario_padrao = Usuario.objects.get(username='usuario_padrao')
+            
+            # Busca os PECS que são 'de crise' E que pertencem ao usuário logado OU ao usuário padrão
+            crisis_pecs = PECs.objects.filter(
+                Q(is_crisis_card=True) & (Q(usuario=request.user) | Q(usuario=usuario_padrao))
+            ).order_by('texto')
+
+        except Usuario.DoesNotExist:
+            # Se o usuario_padrao não existir, mostra apenas os do usuário logado
+            crisis_pecs = PECs.objects.filter(is_crisis_card=True, usuario=request.user).order_by('texto')
+
+        context = {
+            'crisis_pecs_list': crisis_pecs
+        }
         return render(request, self.template_name, context)

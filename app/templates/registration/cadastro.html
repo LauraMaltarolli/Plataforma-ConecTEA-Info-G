@@ -6,74 +6,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - ConecTEA</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: var(--light-blue-bg);
-        }
-        .register-card {
-            max-width: 500px;
-            width: 100%;
-            padding: 40px;
-            border-radius: 15px;
-            background-color: var(--white);
-            box-shadow: 0 10px 30px var(--shadow-hover);
-        }
-        .invalid-feedback {
-            display: block;
-            font-weight: 600;
-        }
-    </style>
 </head>
 <body>
-    <div class="register-card">
-        <h2 class="text-center mb-4">Crie sua Conta</h2>
+    <div class="auth-container">
+        <div class="auth-branding-side">
+            <div class="auth-branding-content">
+                <h1>Junte-se ao ConecTEA</h1>
+                <p>Crie sua conta e tenha acesso a todas as ferramentas de apoio.</p>
+            </div>
+        </div>
+        <div class="auth-form-side">
+            <div class="auth-form-container">
+                <h2>Crie sua Conta</h2>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
                     
-                    {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text|safe }}</small>
-                    {% endif %}
-
-                    {% if field.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in field.errors %}
-                                {{ error }}
-                            {% endfor %}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Por favor, corrija os erros abaixo.
                         </div>
                     {% endif %}
+
+                    <div class="form-group form-group-icon">
+                        {{ form.username.label_tag }}
+                        <i class="fas fa-user fa-icon"></i>
+                        {{ form.username }}
+                        {{ form.username.errors }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                             {{ form.first_name.label_tag }}
+                             {{ form.first_name }}
+                             {{ form.first_name.errors }}
+                        </div>
+                        <div class="col-md-6 form-group">
+                             {{ form.last_name.label_tag }}
+                             {{ form.last_name }}
+                             {{ form.last_name.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-icon">
+                        {{ form.email.label_tag }}
+                        <i class="fas fa-envelope fa-icon"></i>
+                        {{ form.email }}
+                        {{ form.email.errors }}
+                    </div>
+                    
+                    <div class="form-group form-group-icon">
+                        {{ form.password1.label_tag }}
+                        <i class="fas fa-lock fa-icon"></i>
+                        {{ form.password1 }}
+                    </div>
+                    <small class="form-text text-muted">{{ form.password1.help_text|safe }}</small>
+                        {{ form.password1.errors }}
+
+                    <div class="form-group form-group-icon">
+                        {{ form.password2.label_tag }}
+                        <i class="fas fa-lock fa-icon"></i>
+                        {{ form.password2 }}
+                        {{ form.password2.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.tipo_usuario.label_tag }}
+                        {{ form.tipo_usuario }}
+                        {{ form.tipo_usuario.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.imagem_perfil.label_tag }}
+                        {{ form.imagem_perfil }}
+                        {{ form.imagem_perfil.errors }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block mt-4">Cadastrar</button>
+                </form>
+                <div class="text-center mt-4">
+                    <p>Já tem uma conta? <a href="{% url 'login' %}">Faça o login</a></p>
                 </div>
-            {% endfor %}
-            
-            <button type="submit" class="btn btn-primary btn-block mt-4">Cadastrar</button>
-        </form>
-        <div class="text-center mt-3">
-            <a href="{% url 'login' %}">Já tem uma conta? Faça o login</a>
+            </div>
         </div>
     </div>
 </body>

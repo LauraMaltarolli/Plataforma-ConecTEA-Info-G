@@ -83,6 +83,7 @@ class PECs(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='pecs', verbose_name="Usuário")
     imagem = models.ImageField(upload_to='pecs/')
     texto = models.CharField(max_length=100)
+    is_crisis_card = models.BooleanField(default=False, verbose_name="É um cartão de crise?")
 
     class Meta:
         verbose_name = "PECs"

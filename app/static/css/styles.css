@@ -250,3 +250,202 @@ h1, h2, h3, h4, h5, h6 {
         max-width: 2000px;
     }
 }
+
+/* /app/static/css/styles.css */
+
+/* --- ESTILOS PARA PÁGINAS DE LOGIN E CADASTRO --- */
+
+.auth-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.auth-branding-side {
+    width: 50%;
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.auth-branding-content h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--white);
+}
+
+.auth-branding-content p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+.auth-form-side {
+    width: 50%;
+    background-color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.auth-form-container {
+    max-width: 450px;
+    width: 100%;
+}
+
+.auth-form-container h2 {
+    font-size: 2.5rem;
+    color: var(--dark-text);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.form-group-icon {
+    position: relative;
+}
+
+.form-group-icon .form-control {
+    padding-left: 2.5rem;
+}
+
+.form-group-icon .fa-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-text);
+}
+
+.auth-form-container .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.auth-form-container .btn-primary:hover {
+    background-color: #388E3C;
+    border-color: #388E3C;
+}
+
+.auth-form-container .text-center a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-form-container .text-center a:hover {
+    text-decoration: underline;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 992px) {
+    .auth-branding-side {
+        display: none; /* Esconde a imagem em telas menores */
+    }
+    .auth-form-side {
+        width: 100%;
+    }
+}
+
+/* --- ESTILOS PARA A PÁGINA DE PECS --- */
+
+.pecs-card {
+    border-radius: 15px !important;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--border-light) !important;
+}
+
+.pecs-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px var(--shadow-hover);
+}
+
+/* Container da imagem com o padding que você pediu */
+.pecs-card-img-container {
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.pecs-card-img {
+    height: 180px;
+    width: 100%;
+    object-fit: contain; /* 'contain' evita que a imagem seja cortada */
+}
+
+.pecs-modal-img {
+    max-width: 100%;
+    height: auto;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+/* --- ESTILOS PARA O BOTÃO FLUTUANTE DO MODO CRISE --- */
+
+.fab-crisis-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1050;
+
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Garante que o ícone comece centralizado */
+
+    width: 60px;
+    height: 60px;
+    background-color: #f39c12; /* Laranja */
+    color: white;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.fab-crisis-button:hover {
+    width: 200px;
+    background-color: #e67e22;
+    text-decoration: none;
+    color: white;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda no hover */
+    padding-left: 20px; /* Adiciona um espaçamento interno no hover */
+}
+
+.fab-crisis-button .fab-icon {
+    font-size: 1.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.fab-crisis-button .fab-text {
+    white-space: nowrap;
+    opacity: 0;
+    /* Começa sem largura para não ocupar espaço */
+    width: 0;
+    margin-left: 0;
+    transition: all 0.2s ease-in-out;
+    font-weight: 600;
+}
+
+.fab-crisis-button:hover .fab-text {
+    opacity: 1;
+    width: auto; /* Permite que o texto ocupe o espaço necessário */
+    margin-left: 15px; /* Cria um espaço entre o ícone e o texto */
+}
+
+.fab-crisis-button:hover .fab-icon {
+    /* Pequeno ajuste para o ícone não "pular" tanto */
+    transform: scale(1.1);
+}
