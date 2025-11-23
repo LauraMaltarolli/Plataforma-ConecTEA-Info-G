@@ -17,19 +17,24 @@
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
                 <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-hand-holding-heart mr-2"></i>ConecTEA</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mr-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'rotina_list' %}"><i class="fas fa-tasks mr-1"></i>Rotinas</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'pecs' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'guia_list' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'postagem_list' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'perfil_apoio' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                            
+                            {% if user.tipo_usuario == 'TEA' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'pecs' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'perfil_hub' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                            {% endif %}
+                            
+                            {% if user.tipo_usuario == 'EDUCADOR' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'guia_list' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'postagem_list' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
+                            {% endif %}
+
                         {% else %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-tasks mr-1"></i>Rotinas</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
@@ -73,64 +78,75 @@
             <div class="container">
                 <h2 class="mb-5">Nossas Ferramentas de Apoio</h2>
                 <div class="row">
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="feature-card">
-                            <div class="icon"><i class="fas fa-calendar-alt"></i></div>
-                            <h3>Rotinas Visuais</h3>
-                            <p>Crie rotinas diárias personalizadas com imagens e sequência de atividades, promovendo previsibilidade e autonomia.</p>
-                            <a href="{% if user.is_authenticated %}{% url 'rotina_list' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Explorar Rotinas <i class="fas fa-chevron-right ml-1"></i></a>
+
+                    {% if not user.is_authenticated or user.tipo_usuario == 'TEA' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="feature-card">
+                                <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                                <h3>Rotinas Visuais</h3>
+                                <p>Crie rotinas diárias personalizadas...</p>
+                                <a href="{% if user.is_authenticated %}{% url 'perfil_hub' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Explorar Rotinas <i class="fas fa-chevron-right ml-1"></i></a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="feature-card">
-                            <div class="icon"><i class="fas fa-image"></i></div>
-                            <h3>PECS Interativos</h3>
-                            <p>Utilize o Sistema de Comunicação por Troca de Imagens (PECS) para facilitar a expressão e o entendimento.</p>
-                            <a href="{% if user.is_authenticated %}{% url 'pecs' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Acessar PECS <i class="fas fa-chevron-right ml-1"></i></a>
+                    
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="feature-card">
+                                <div class="icon"><i class="fas fa-image"></i></div>
+                                <h3>PECS Interativos</h3>
+                                <p>Utilize o Sistema de Comunicação...</p>
+                                <a href="{% if user.is_authenticated %}{% url 'pecs' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Acessar PECS <i class="fas fa-chevron-right ml-1"></i></a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="feature-card">
-                            <div class="icon"><i class="fas fa-info-circle"></i></div>
-                            <h3>Guias Informativos</h3>
-                            <p>Uma vasta biblioteca de artigos e materiais educativos sobre o TEA, acessíveis e confiáveis.</p>
-                            <a href="{% if user.is_authenticated %}{% url 'guia_list' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Ver Guias <i class="fas fa-chevron-right ml-1"></i></a>
+
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="feature-card">
+                                <div class="icon"><i class="fas fa-user-edit"></i></div>
+                                <h3>Perfil de Apoio</h3>
+                                <p>Gerencie informações importantes...</p>
+                                <a href="{% if user.is_authenticated %}{% url 'perfil_hub' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Meu Perfil <i class="fas fa-chevron-right ml-1"></i></a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="feature-card">
-                            <div class="icon"><i class="fas fa-comments"></i></div>
-                            <h3>Comunidade Ativa</h3>
-                            <p>Conecte-se com outros usuários, compartilhe experiências e encontre apoio em um fórum seguro.</p>
-                            <a href="{% if user.is_authenticated %}{% url 'postagem_list' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Participar <i class="fas fa-chevron-right ml-1"></i></a>
+
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="feature-card">
+                                <div class="icon"><i class="fas fa-exclamation-circle"></i></div>
+                                <h3>Modo Crise</h3>
+                                <p>Ative um modo de emergência...</p>
+                                <a href="{% if user.is_authenticated %}{% url 'modo_crise' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Ativar Modo <i class="fas fa-chevron-right ml-1"></i></a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="feature-card">
-                            <div class="icon"><i class="fas fa-user-edit"></i></div>
-                            <h3>Perfil de Apoio</h3>
-                            <p>Gerencie informações importantes sobre o perfil da pessoa com TEA, incluindo contatos e preferências.</p>
-                            <a href="{% if user.is_authenticated %}{% url 'perfil_apoio' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Meu Perfil <i class="fas fa-chevron-right ml-1"></i></a>
+                    {% endif %}
+
+                    {% if not user.is_authenticated or user.tipo_usuario == 'EDUCADOR' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="feature-card">
+                                <div class="icon"><i class="fas fa-info-circle"></i></div>
+                                <h3>Guias Informativos</h3>
+                                <p>Uma vasta biblioteca de artigos...</p>
+                                <a href="{% if user.is_authenticated %}{% url 'guia_list' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Ver Guias <i class="fas fa-chevron-right ml-1"></i></a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="feature-card">
-                            <div class="icon"><i class="fas fa-exclamation-circle"></i></div>
-                            <h3>Modo Crise</h3>
-                            <p>Ative um modo de emergência com recursos calmantes e de comunicação rápida para momentos de crise.</p>
-                            <a href="{% if user.is_authenticated %}{% url 'modo_crise' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Ativar Modo <i class="fas fa-chevron-right ml-1"></i></a>
+                    
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="feature-card">
+                                <div class="icon"><i class="fas fa-comments"></i></div>
+                                <h3>Comunidade Ativa</h3>
+                                <p>Conecte-se com outros usuários...</p>
+                                <a href="{% if user.is_authenticated %}{% url 'postagem_list' %}{% else %}{% url 'login' %}{% endif %}" class="btn btn-outline-secondary">Participar <i class="fas fa-chevron-right ml-1"></i></a>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
+
                 </div>
             </div>
         </section>
     </main>
 
-    {% if user.is_authenticated %}
-    <a href="{% url 'modo_crise' %}" class="fab-crisis-button">
-        <i class="fas fa-exclamation-triangle fab-icon"></i>
-        <span class="fab-text">Modo Crise</span>
-    </a>
+    {% if user.is_authenticated and user.tipo_usuario != 'EDUCADOR' %}
+        <a href="{% url 'modo_crise' %}" class="fab-crisis-button">
+            <i class="fas fa-exclamation-triangle fab-icon"></i>
+            <span class="fab-text">Modo Crise</span>
+        </a>
     {% endif %}
 
     <footer class="footer">

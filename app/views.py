@@ -14,6 +14,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from .mixins import UserTypeRequiredMixin
 
 
 class IndexView(View):
@@ -70,46 +71,50 @@ class CustomLogoutView(View):
         messages.success(request, 'Você saiu da sua conta com sucesso.')
         return redirect('index')
 
-class RotinaListView(LoginRequiredMixin, View):
+class RotinaListView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     template_name = 'rotina_list.html'
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
 
     def get(self, request, *args, **kwargs):
-        rotinas = Rotina.objects.filter(usuario=request.user)
+        perfil_id = kwargs.get('pk')
+        # Busca o perfil, garantindo que o usuário logado é o 'gerente' dele
+        perfil = get_object_or_404(PerfilApoio, pk=perfil_id, gerente=request.user)
+        
+        # Filtra as rotinas que pertencem a este perfil específico
+        rotinas_do_perfil = Rotina.objects.filter(perfil_apoio=perfil)
+        
         context = {
-            'rotinas': rotinas,
+            'rotinas': rotinas_do_perfil,
+            'perfil': perfil  # Passa o objeto do perfil para o template
         }
         return render(request, self.template_name, context)
 
-class RotinaCreateView(LoginRequiredMixin, View):
+class RotinaCreateView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
+
     def post(self, request, *args, **kwargs):
-        # Carrega os dados enviados via AJAX
-        data = json.loads(request.body)
-        titulo = data.get('titulo')
-        descricao = data.get('descricao')
-
-        if titulo:
-            # Cria a nova rotina associada ao usuário logado
-            rotina = Rotina.objects.create(
-                usuario=request.user,
-                titulo=titulo,
-                descricao=descricao
-            )
-            # Retorna os dados da rotina criada em formato JSON
-            return JsonResponse({
-                'status': 'success',
-                'id': rotina.id,
-                'titulo': rotina.titulo,
-                'descricao': rotina.descricao
-            }, status=201)
+        perfil_id = kwargs.get('pk')
+        perfil = get_object_or_404(PerfilApoio, pk=perfil_id, gerente=request.user)
         
-        # Se o título estiver faltando, retorna um erro
-        return JsonResponse({'status': 'error', 'message': 'Título é obrigatório.'}, status=400)
+        data = json.loads(request.body)
+        
+        rotina = Rotina.objects.create(
+            perfil_apoio=perfil, # <--- CORREÇÃO: Associa ao perfil correto
+            titulo=data.get('titulo'),
+            descricao=data.get('descricao')
+        )
+        
+        return JsonResponse({'status': 'success', 'id': rotina.id}, status=201)
 
-class RotinaUpdateView(LoginRequiredMixin, View):
+class RotinaUpdateView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
+
     def get(self, request, *args, **kwargs):
-        # Esta parte é chamada quando clicamos em "Editar" para buscar os dados
         pk = kwargs.get('pk')
-        rotina = get_object_or_404(Rotina, pk=pk, usuario=request.user)
+        # Correção do caminho do usuário
+        rotina = get_object_or_404(Rotina, pk=pk, perfil_apoio__gerente=request.user)
+        
+        # Retorna os dados para preencher o modal via JavaScript
         data = {
             'id': rotina.id,
             'titulo': rotina.titulo,
@@ -118,9 +123,11 @@ class RotinaUpdateView(LoginRequiredMixin, View):
         return JsonResponse(data)
 
     def post(self, request, *args, **kwargs):
-        # Esta parte é chamada quando salvamos o formulário de edição
         pk = kwargs.get('pk')
-        rotina = get_object_or_404(Rotina, pk=pk, usuario=request.user)
+        # Correção do caminho do usuário
+        rotina = get_object_or_404(Rotina, pk=pk, perfil_apoio__gerente=request.user)
+        
+        # Lê os dados enviados pelo JavaScript (JSON)
         data = json.loads(request.body)
         
         rotina.titulo = data.get('titulo', rotina.titulo)
@@ -134,65 +141,90 @@ class RotinaUpdateView(LoginRequiredMixin, View):
             'descricao': rotina.descricao
         })
 
-class RotinaDeleteView(LoginRequiredMixin, View):
+class RotinaDeleteView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
+
     def post(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
-        rotina = get_object_or_404(Rotina, pk=pk, usuario=request.user)
+        # Correção do caminho do usuário
+        rotina = get_object_or_404(Rotina, pk=pk, perfil_apoio__gerente=request.user)
         rotina.delete()
+        # Retorna JSON para o JavaScript saber que deu certo
         return JsonResponse({'status': 'success', 'message': 'Rotina excluída com sucesso!'})
 
-class RotinaDetailView(LoginRequiredMixin, View):
+class RotinaDetailView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     template_name = 'rotina_detail.html'
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
 
     def get(self, request, *args, **kwargs):
-        # Usamos o 'pk' (primary key) da URL para buscar a rotina exata
-        pk_da_rotina = kwargs.get('pk')
-        rotina = get_object_or_404(Rotina, pk=pk_da_rotina, usuario=request.user)
+        pk = kwargs.get('pk')
+        # CORREÇÃO DO ERRO: Busca a rotina através do perfil do gerente
+        rotina = get_object_or_404(Rotina, pk=pk, perfil_apoio__gerente=request.user)
         
-        context = {
-            'rotina': rotina
-        }
+        context = {'rotina': rotina}
         return render(request, self.template_name, context)
 
 class ItemRotinaCreateView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        rotina_id = kwargs.get('pk')
-        rotina = get_object_or_404(Rotina, pk=rotina_id, usuario=request.user)
-        
-        descricao = request.POST.get('descricao')
-        imagem = request.FILES.get('imagem')
+        try:
+            rotina_id = kwargs.get('pk')
+            # Busca a rotina ligada ao perfil do gerente
+            rotina = get_object_or_404(Rotina, pk=rotina_id, perfil_apoio__gerente=request.user)
+            
+            descricao = request.POST.get('descricao')
+            imagem = request.FILES.get('imagem')
 
-        if not descricao:
-            return JsonResponse({'status': 'error', 'message': 'Descrição é obrigatória.'}, status=400)
+            if not descricao:
+                return JsonResponse({'status': 'error', 'message': 'Descrição é obrigatória.'}, status=400)
 
-        ordem = rotina.itens.count()
-        item = ItemRotina.objects.create(
-            rotina=rotina,
-            descricao=descricao,
-            imagem=imagem,
-            ordem=ordem
-        )
-        
-        # Retorna os dados do novo item como JSON para o JavaScript
-        return JsonResponse({
-            'status': 'success',
-            'id': item.id,
-            'descricao': item.descricao,
-            'imagem_url': item.imagem.url if item.imagem else None,
-        }, status=201)
+            # Verifica quantos itens existem para definir a ordem
+            # Se 'related_name' não estiver definido no model, usa 'itemrotina_set'
+            if hasattr(rotina, 'itens'):
+                ordem = rotina.itens.count()
+            else:
+                ordem = rotina.itemrotina_set.count()
+
+            item = ItemRotina.objects.create(
+                rotina=rotina,
+                descricao=descricao,
+                imagem=imagem,
+                ordem=ordem
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'id': item.id,
+                'descricao': item.descricao,
+                'imagem_url': item.imagem.url if item.imagem else None,
+            }, status=201)
+
+        except Exception as e:
+            # ISSO VAI IMPRIMIR O ERRO REAL NO SEU TERMINAL
+            print(f"ERRO AO CRIAR ITEM ROTINA: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 class ItemRotinaDeleteView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         item_id = kwargs.get('pk')
-        item = get_object_or_404(ItemRotina, pk=item_id, rotina__usuario=request.user)
+        
+        # 1. Busca o item apenas pelo ID (sem tentar filtrar por usuário ainda)
+        item = get_object_or_404(ItemRotina, pk=item_id)
+
+        # 2. Verificação de Segurança Manual
+        # Navegamos: Item -> Rotina -> PerfilApoio -> Gerente
+        # Se o gerente do perfil NÃO for o usuário logado, bloqueia.
+        if item.rotina.perfil_apoio.gerente != request.user:
+            raise PermissionDenied("Você não tem permissão para excluir este item.")
+
+        # 3. Se chegou aqui, tem permissão. Realiza a exclusão.
         rotina_id = item.rotina.id
         item.delete()
         messages.success(request, 'Item excluído com sucesso!')
         
-        # Redireciona de volta para a página de detalhes, causando o recarregamento
         return redirect('rotina_detail', pk=rotina_id)
 
-class SalvarOrdemItensView(LoginRequiredMixin, View):
+class SalvarOrdemItensView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
@@ -207,8 +239,9 @@ class SalvarOrdemItensView(LoginRequiredMixin, View):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-class PostagemListView(LoginRequiredMixin,View):
+class PostagemListView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     template_name = 'postagem_list.html'
+    allowed_types = ['EDUCADOR', 'CUIDADOR', 'ADM']
 
     def get(self, request, *args, **kwargs):
         postagens = Postagem.objects.all()
@@ -217,61 +250,78 @@ class PostagemListView(LoginRequiredMixin,View):
         }
         return render(request, self.template_name, context)
 
-class GuiaInformativoListView(View):
+class GuiaInformativoListView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     template_name = 'guia_list.html'
+    # Apenas estes perfis podem ver a lista
+    allowed_types = ['EDUCADOR', 'CUIDADOR', 'ADM']
 
     def get(self, request, *args, **kwargs):
-        guias = GuiaInformativo.objects.all()
-        context = {
-            'guias': guias,
-        }
+        # Busca todos os guias, do mais recente para o mais antigo
+        guias = GuiaInformativo.objects.all().order_by('-data_criacao')
+        
+        # Lógica simples de busca (opcional, mas útil)
+        termo_busca = request.GET.get('q')
+        if termo_busca:
+            guias = guias.filter(titulo__icontains=termo_busca)
+
+        context = {'guias': guias}
         return render(request, self.template_name, context)
 
+class GuiaDetailView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'guia_detail.html'
+    allowed_types = ['EDUCADOR', 'CUIDADOR', 'ADM']
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        guia = get_object_or_404(GuiaInformativo, pk=pk)
+        context = {'guia': guia}
+        return render(request, self.template_name, context)
+    
 class PECsView(LoginRequiredMixin, View):
     template_name = 'pecs.html'
 
     def get(self, request, *args, **kwargs):
         Usuario = get_user_model()
-        
-        # Prepara a base da consulta para pegar os cartões do usuário logado e do usuário padrão
         base_query = Q(usuario=request.user)
         try:
             usuario_padrao = Usuario.objects.get(username='usuario_padrao')
             base_query |= Q(usuario=usuario_padrao)
         except Usuario.DoesNotExist:
-            pass # Continua sem o usuário padrão se ele não for encontrado
+            pass
 
-        # --- NOVA LÓGICA DE PERMISSÃO ---
         if request.user.is_superuser:
-            # Se o usuário for um admin, busca TODOS os cartões (de crise ou não)
             pecs_a_exibir = PECs.objects.filter(base_query).order_by('texto')
         else:
-            # Se for um usuário normal, busca apenas os cartões que NÃO são de crise
             pecs_a_exibir = PECs.objects.filter(base_query, is_crisis_card=False).order_by('texto')
         
-        context = {
-            'pecs_list': pecs_a_exibir
-        }
+        context = {'pecs_list': pecs_a_exibir}
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        # A lógica de criação de um novo cartão não muda.
         texto = request.POST.get('texto')
         imagem = request.FILES.get('imagem')
+        
+        # NOVA LÓGICA: Verifica se o checkbox foi marcado (apenas se for admin)
+        is_crisis = False
+        if request.user.is_superuser:
+            # Checkboxes HTML enviam 'on' se marcados, ou nada se desmarcados
+            is_crisis = request.POST.get('is_crisis_card') == 'on'
 
         if texto and imagem:
             PECs.objects.create(
                 usuario=request.user,
                 texto=texto,
-                imagem=imagem
+                imagem=imagem,
+                is_crisis_card=is_crisis # Salva o status de crise
             )
-            messages.success(request, 'Cartão PECS pessoal adicionado com sucesso!')
+            messages.success(request, 'Cartão PECS adicionado com sucesso!')
         else:
             messages.error(request, 'Erro: Texto e imagem são obrigatórios.')
         
         return redirect('pecs')
 
-class PECsDeleteView(LoginRequiredMixin, View):
+class PECsDeleteView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
     def post(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         pec = get_object_or_404(PECs, pk=pk)
@@ -289,23 +339,24 @@ class PECsDeleteView(LoginRequiredMixin, View):
 
 class PECsUpdateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        # Busca os dados do PECS para preencher o formulário de edição
         pk = kwargs.get('pk')
         pec = get_object_or_404(PECs, pk=pk)
 
-        # Verifica a permissão antes de enviar os dados
         if not (pec.usuario == request.user or request.user.is_superuser):
             raise PermissionDenied("Você não tem permissão para editar este cartão.")
 
-        data = { 'id': pec.id, 'texto': pec.texto, 'imagem_url': pec.imagem.url }
+        data = { 
+            'id': pec.id, 
+            'texto': pec.texto, 
+            'imagem_url': pec.imagem.url,
+            'is_crisis_card': pec.is_crisis_card # Envia o status atual para o JS
+        }
         return JsonResponse(data)
 
     def post(self, request, *args, **kwargs):
-        # Salva as alterações enviadas pelo formulário
         pk = kwargs.get('pk')
         pec = get_object_or_404(PECs, pk=pk)
 
-        # Verifica a permissão antes de salvar
         if not (pec.usuario == request.user or request.user.is_superuser):
             raise PermissionDenied("Você não tem permissão para editar este cartão.")
 
@@ -313,39 +364,108 @@ class PECsUpdateView(LoginRequiredMixin, View):
         if request.FILES.get('imagem'):
             pec.imagem = request.FILES.get('imagem')
         
+        # NOVA LÓGICA: Atualiza o status de crise (apenas se for admin)
+        if request.user.is_superuser:
+            pec.is_crisis_card = request.POST.get('is_crisis_card') == 'on'
+        
         pec.save()
 
         return JsonResponse({
             'status': 'success',
             'id': pec.id,
             'texto': pec.texto,
-            'imagem_url': pec.imagem.url
+            'imagem_url': pec.imagem.url,
+            'is_crisis_card': pec.is_crisis_card
         })
 
-class PerfilApoioView(LoginRequiredMixin, View):
-    template_name = 'perfil_apoio.html'
+class PerfilHubView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'perfil_hub.html'
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
 
     def get(self, request, *args, **kwargs):
-        perfil, created = PerfilApoio.objects.get_or_create(usuario=request.user)
+        perfis = PerfilApoio.objects.filter(gerente=request.user)
+        
+        # LÓGICA DE RESTRIÇÃO VISUAL:
+        # Define se o botão 'Criar' deve aparecer
+        pode_criar_perfil = True
+        
+        # Se for usuário TEA e já tiver um perfil, NÃO pode criar outro
+        if request.user.tipo_usuario == 'TEA' and perfis.exists():
+            pode_criar_perfil = False
+            
         context = {
-            'perfil': perfil,
+            'perfis_list': perfis,
+            'pode_criar_perfil': pode_criar_perfil # Passamos essa variável para o template
         }
         return render(request, self.template_name, context)
 
+class PerfilCreateView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        perfil = PerfilApoio.objects.get(usuario=request.user)
+        # LÓGICA DE RESTRIÇÃO DE SEGURANÇA:
+        # Antes de criar, verifica se o usuário TEA já tem um perfil
+        if request.user.tipo_usuario == 'TEA':
+            if PerfilApoio.objects.filter(gerente=request.user).exists():
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': 'Usuários TEA podem ter apenas um perfil.'
+                }, status=403)
+
+        data = json.loads(request.body)
         
-        perfil.contato_emergencia = request.POST.get('contato_emergencia')
-        perfil.informacoes_medicas = request.POST.get('informacoes_medicas')
-        perfil.gostos_interesses = request.POST.get('gostos_interesses')
-        perfil.comportamentos_sensoriais = request.POST.get('comportamentos_sensoriais')
+        perfil = PerfilApoio.objects.create(
+            gerente=request.user,
+            nome_perfil=data.get('nome_perfil'),
+            contato_emergencia=data.get('contato_emergencia', ''),
+            informacoes_medicas=data.get('informacoes_medicas', ''),
+            gostos_interesses=data.get('gostos_interesses', ''),
+            comportamentos_sensoriais=data.get('comportamentos_sensoriais', '')
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'id': perfil.id,
+            'nome_perfil': perfil.nome_perfil
+        }, status=201)
+
+class PerfilUpdateView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        perfil = get_object_or_404(PerfilApoio, pk=pk, gerente=request.user)
+        
+        data = {
+            'id': perfil.id,
+            'nome_perfil': perfil.nome_perfil,
+            'contato_emergencia': perfil.contato_emergencia,
+            'informacoes_medicas': perfil.informacoes_medicas,
+            'gostos_interesses': perfil.gostos_interesses,
+            'comportamentos_sensoriais': perfil.comportamentos_sensoriais,
+        }
+        return JsonResponse(data)
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        perfil = get_object_or_404(PerfilApoio, pk=pk, gerente=request.user)
+        data = json.loads(request.body)
+        
+        perfil.nome_perfil = data.get('nome_perfil', perfil.nome_perfil)
+        perfil.contato_emergencia = data.get('contato_emergencia', perfil.contato_emergencia)
+        perfil.informacoes_medicas = data.get('informacoes_medicas', perfil.informacoes_medicas)
+        perfil.gostos_interesses = data.get('gostos_interesses', perfil.gostos_interesses)
+        perfil.comportamentos_sensoriais = data.get('comportamentos_sensoriais', perfil.comportamentos_sensoriais)
         perfil.save()
+        
+        return JsonResponse({'status': 'success', 'id': perfil.id, 'nome_perfil': perfil.nome_perfil})
 
-        messages.success(request, 'Perfil de Apoio atualizado com sucesso!')
-        return redirect('app:perfil_apoio')
+class PerfilDeleteView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        perfil = get_object_or_404(PerfilApoio, pk=pk, gerente=request.user)
+        perfil.delete()
+        return JsonResponse({'status': 'success', 'message': 'Perfil excluído com sucesso!'})
 
-class ModoCriseView(LoginRequiredMixin, View):
+class ModoCriseView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     template_name = 'modo_crise.html'
+    allowed_types = ['TEA', 'CUIDADOR', 'ADM']
 
     def get(self, request, *args, **kwargs):
         Usuario = get_user_model()

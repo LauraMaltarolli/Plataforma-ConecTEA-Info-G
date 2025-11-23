@@ -1,7 +1,8 @@
 $(document).ready(function() {
+    // Pega o token CSRF do primeiro formulário da página
     var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
 
-    // Ação para o botão "Criar Nova Rotina" (inalterado)
+    // Ação para o botão "Criar Nova Rotina"
     $('#btn-criar-rotina').on('click', function() {
         $('#rotina-form')[0].reset();
         $('#rotina-id').val(''); 
@@ -9,31 +10,38 @@ $(document).ready(function() {
         $('#rotinaFormModal').modal('show');
     });
 
-    // Ação para o botão "Editar" (inalterado)
+    // Ação para o botão "Editar" (que abre o modal)
     $('#rotina-list').on('click', '.edit-rotina-btn', function() {
         var rotinaId = $(this).data('id');
         
+        // Busca os dados da rotina no servidor
         $.ajax({
-            url: `/rotinas/${rotinaId}/update/`,
+            url: `/rotinas/${rotinaId}/update/`, // URL para buscar dados (GET)
             method: 'GET',
             success: function(data) {
+                // Preenche o formulário com os dados
                 $('#rotina-id').val(data.id);
                 $('#titulo').val(data.titulo);
                 $('#descricao').val(data.descricao);
+                
                 $('#rotinaModalLabel').text('Editar Rotina');
                 $('#rotinaFormModal').modal('show');
+            },
+            error: function() {
+                alert('Erro ao buscar dados da rotina.');
             }
         });
     });
 
-    // Lida com o SUBMIT do formulário (CRIAR e EDITAR)
+    // Ação para o SUBMIT do formulário (Criar e Editar)
     $('#rotina-form').on('submit', function(event) {
         event.preventDefault();
         
         var rotinaId = $('#rotina-id').val();
-        var url = rotinaId ? `/rotinas/${rotinaId}/update/` : '/rotinas/criar/';
-        var method = 'POST';
-
+        
+        // A URL de criação agora é dinâmica, baseada no ID do perfil
+        var url = rotinaId ? `/rotinas/${rotinaId}/update/` : `/perfis/${PERFIL_ID}/rotinas/criar/`;
+        
         var data = {
             titulo: $('#titulo').val(),
             descricao: $('#descricao').val()
@@ -41,30 +49,29 @@ $(document).ready(function() {
 
         $.ajax({
             url: url,
-            method: method,
+            method: 'POST',
             data: JSON.stringify(data),
             contentType: 'application/json',
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("X-CSRFToken", csrfToken);
             },
             success: function(response) {
-                // MUDANÇA AQUI: Em vez de manipular o HTML,
-                // simplesmente recarregamos a página para ver o resultado.
-                location.reload();
+                location.reload(); // Recarrega a página após o sucesso
             },
             error: function() {
-                alert('Ocorreu um erro ao salvar a rotina.');
+                alert('Ocorreu um erro. Verifique se o Título foi preenchido.');
             }
         });
     });
 
-    // Lida com a EXCLUSÃO da rotina
+    // Ação para o botão "Excluir" (que abre o modal de confirmação)
     var rotinaIdToDelete = null;
     $('#rotina-list').on('click', '.delete-rotina-btn', function() {
         rotinaIdToDelete = $(this).data('id');
         $('#deleteRotinaConfirmModal').modal('show');
     });
 
+    // Ação para o botão de confirmação "Sim, Excluir"
     $('#confirm-delete-rotina-btn').on('click', function() {
         if (rotinaIdToDelete) {
             $.ajax({
@@ -74,12 +81,7 @@ $(document).ready(function() {
                     xhr.setRequestHeader("X-CSRFToken", csrfToken);
                 },
                 success: function(response) {
-                    // MUDANÇA AQUI: Também recarregamos a página
-                    // após a exclusão bem-sucedida.
-                    location.reload();
-                },
-                error: function() {
-                    alert('Ocorreu um erro ao excluir a rotina.');
+                    location.reload(); // Recarrega a página após o sucesso
                 }
             });
         }

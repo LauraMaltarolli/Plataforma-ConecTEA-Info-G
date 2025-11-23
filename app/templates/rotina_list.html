@@ -33,17 +33,28 @@
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
                 <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-hand-holding-heart mr-2"></i>ConecTEA</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mr-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'rotina_list' %}"><i class="fas fa-tasks mr-1"></i>Rotinas</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'pecs' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'guia_list' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'postagem_list' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'perfil_apoio' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                            
+                            {% if user.tipo_usuario == 'TEA' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'pecs' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'perfil_hub' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                            {% endif %}
+                            
+                            {% if user.tipo_usuario == 'EDUCADOR' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'guia_list' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'postagem_list' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
+                            {% endif %}
+
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
                         {% endif %}
                     </ul>
                     <ul class="navbar-nav">
@@ -164,5 +175,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="{% static 'js/rotinas.js' %}"></script>
+    <script type="text/javascript">
+        // Passa o ID do perfil (que a view 'RotinaListView' nos deu) para o JavaScript
+        const PERFIL_ID = {{ perfil.id }};
+    </script>
 </body>
 </html>

@@ -29,12 +29,18 @@ $(document).ready(function() {
     // 1. Quando o botão "Editar" do modal de detalhes é clicado (inalterado)
     $('#open-edit-modal-btn').on('click', function() {
         var updateUrl = $(this).data('update-url');
+        
         $.ajax({
             url: updateUrl,
             method: 'GET',
             success: function(data) {
                 $('#edit-pecs-form').attr('action', updateUrl);
                 $('#edit-texto').val(data.texto);
+                
+                // NOVA LINHA: Marca/Desmarca o checkbox baseado nos dados do servidor
+                // O .prop() verifica se o elemento existe, então não quebra se não for admin
+                $('#edit-is-crisis').prop('checked', data.is_crisis_card);
+                
                 $('#pecsDetailModal').modal('hide');
                 $('#pecsEditModal').modal('show');
             }

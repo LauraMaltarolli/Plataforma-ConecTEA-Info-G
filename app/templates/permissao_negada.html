@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito - ConecTEA</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body style="background-color: var(--light-blue-bg);">
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+            <div class="col-md-6 text-center">
+                <div class="card p-5 shadow-sm">
+                    <h1 class="display-4 text-danger"><i class="fas fa-lock"></i></h1>
+                    <h2 class="mb-3">Acesso Restrito</h2>
+                    <p class="lead">Desculpe, você não tem permissão para acessar esta página. Ela é restrita a tipos de usuário específicos.</p>
+                    <hr>
+                    <p class="mb-0">Se você acredita que isso é um erro, entre em contato com o administrador.</p>
+                    <a href="javascript:history.back()" class="btn btn-primary btn-lg mt-4">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

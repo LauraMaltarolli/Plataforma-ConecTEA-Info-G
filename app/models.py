@@ -33,12 +33,8 @@ class Usuario(AbstractUser):
     )
 
 class PerfilApoio(models.Model):
-    usuario = models.OneToOneField(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name='perfil_apoio',
-        verbose_name="Usuário"
-    )
+    gerente = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='perfis_gerenciados')
+    nome_perfil = models.CharField(max_length=100, verbose_name="Nome do Perfil")
     contato_emergencia = models.CharField(max_length=100, blank=True, verbose_name="Contato de Emergência")
     informacoes_medicas = models.TextField(blank=True, verbose_name="Informações Médicas")
     gostos_interesses = models.TextField(blank=True, verbose_name="Gostos e Interesses")
@@ -52,7 +48,7 @@ class PerfilApoio(models.Model):
         return f"Perfil de Apoio de {self.usuario.username}"
 
 class Rotina(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='rotinas', verbose_name="Usuário")
+    perfil_apoio = models.ForeignKey(PerfilApoio, on_delete=models.CASCADE, related_name='rotinas')
     titulo = models.CharField(max_length=100)
     descricao = models.TextField(blank=True, verbose_name="Descrição")
     # CORREÇÃO: Adicionando o campo que faltava
@@ -93,10 +89,14 @@ class PECs(models.Model):
         return self.texto
 
 class GuiaInformativo(models.Model):
-    titulo = models.CharField(max_length=100)
-    descricao = models.TextField(verbose_name="Descrição")
-    link = models.URLField(max_length=255)
-    publico_alvo = models.CharField(max_length=100, verbose_name="Público-Alvo")
+    titulo = models.CharField(max_length=100, verbose_name="Título")
+    descricao = models.TextField(verbose_name="Conteúdo do Guia")
+    link = models.URLField(max_length=255, blank=True, null=True, verbose_name="Link Externo (Opcional)")
+    publico_alvo = models.CharField(max_length=100, verbose_name="Público Alvo")
+    
+    # NOVOS CAMPOS PARA DEIXAR BONITO
+    imagem = models.ImageField(upload_to='guias/', blank=True, null=True, verbose_name="Imagem de Capa")
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Publicação")
 
     class Meta:
         verbose_name = "Guia Informativo"

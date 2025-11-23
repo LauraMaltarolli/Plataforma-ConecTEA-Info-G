@@ -3,15 +3,23 @@
 
 /* Definindo uma paleta de cores acessível e amigável */
 :root {
-    --primary-color: #4CAF50; /* Um verde esperança */
-    --secondary-color: #2196F3; /* Um azul tranquilidade */
-    --light-bg: #E8F5E9; /* Fundo verde muito claro */
-    --light-blue-bg: #E3F2FD; /* Fundo azul muito claro */
-    --dark-text: #37474F; /* Azul escuro quase preto para textos */
-    --medium-text: #546E7A; /* Cinza azulado para textos secundários */
-    --light-text: #90A4AE; /* Cinza claro para detalhes */
+    --primary-color: #4CAF50;
+    /* Um verde esperança */
+    --secondary-color: #2196F3;
+    /* Um azul tranquilidade */
+    --light-bg: #E8F5E9;
+    /* Fundo verde muito claro */
+    --light-blue-bg: #E3F2FD;
+    /* Fundo azul muito claro */
+    --dark-text: #37474F;
+    /* Azul escuro quase preto para textos */
+    --medium-text: #546E7A;
+    /* Cinza azulado para textos secundários */
+    --light-text: #90A4AE;
+    /* Cinza claro para detalhes */
     --white: #ffffff;
-    --border-light: #CFD8DC; /* Borda sutil */
+    --border-light: #CFD8DC;
+    /* Borda sutil */
     --shadow-light: rgba(0, 0, 0, 0.08);
     --shadow-hover: rgba(0, 0, 0, 0.15);
 }
@@ -25,7 +33,12 @@ body {
     padding: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: 'Poppins', sans-serif;
     color: var(--dark-text);
     font-weight: 700;
@@ -33,7 +46,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Navbar */
 .navbar {
-    background-color: var(--secondary-color) !important; /* Azul para a navbar */
+    background-color: var(--secondary-color) !important;
+    /* Azul para a navbar */
     box-shadow: 0 2px 4px var(--shadow-light);
 }
 
@@ -51,7 +65,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-nav .nav-link:hover {
-    color: var(--light-bg) !important; /* Um leve destaque no hover */
+    color: var(--light-bg) !important;
+    /* Um leve destaque no hover */
 }
 
 .navbar-collapse {
@@ -65,11 +80,13 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
     border-bottom: 1px solid var(--border-light);
     position: relative;
-    overflow: hidden; /* Para garantir que as formas não saiam do lugar */
+    overflow: hidden;
+    /* Para garantir que as formas não saiam do lugar */
 }
 
 /* Formas abstratas para um toque de design suave */
-.hero-section::before, .hero-section::after {
+.hero-section::before,
+.hero-section::after {
     content: '';
     position: absolute;
     background: rgba(var(--secondary-color), 0.1);
@@ -77,12 +94,14 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.5;
     z-index: 0;
 }
+
 .hero-section::before {
     width: 200px;
     height: 200px;
     top: -50px;
     left: -50px;
 }
+
 .hero-section::after {
     width: 250px;
     height: 250px;
@@ -92,7 +111,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-section .container {
     position: relative;
-    z-index: 1; /* Garante que o conteúdo fique acima das formas */
+    z-index: 1;
+    /* Garante que o conteúdo fique acima das formas */
 }
 
 .hero-section h1 {
@@ -121,7 +141,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-cta:hover {
-    background-color: #388E3C; /* Um verde um pouco mais escuro no hover */
+    background-color: #388E3C;
+    /* Um verde um pouco mais escuro no hover */
     border-color: #388E3C;
     transform: translateY(-3px);
     color: var(--white);
@@ -141,16 +162,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .feature-card {
-    background-color: var(--light-bg); /* Fundo verde claro para os cards */
+    background-color: var(--light-bg);
+    /* Fundo verde claro para os cards */
     border: 1px solid var(--border-light);
     border-radius: 15px;
     padding: 30px;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%; /* Garante que todos os cards tenham a mesma altura */
+    height: 100%;
+    /* Garante que todos os cards tenham a mesma altura */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Empurra o botão para baixo se necessário */
+    justify-content: space-between;
+    /* Empurra o botão para baixo se necessário */
 }
 
 .feature-card:hover {
@@ -174,7 +198,8 @@ h1, h2, h3, h4, h5, h6 {
 .feature-card p {
     color: var(--medium-text);
     font-size: 1rem;
-    flex-grow: 1; /* Permite que o parágrafo ocupe o espaço extra */
+    flex-grow: 1;
+    /* Permite que o parágrafo ocupe o espaço extra */
 }
 
 .feature-card .btn {
@@ -203,22 +228,34 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Utilitários de espaçamento e margens */
-.mb-5 { margin-bottom: 3rem !important; }
-.mt-5 { margin-top: 3rem !important; }
-.py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+.mb-5 {
+    margin-bottom: 3rem !important;
+}
+
+.mt-5 {
+    margin-top: 3rem !important;
+}
+
+.py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
 
 /* Media Queries para Responsividade */
 @media (max-width: 992px) {
     .hero-section h1 {
         font-size: 2.8rem;
     }
+
     .hero-section .lead {
         font-size: 1.25rem;
     }
+
     .btn-cta {
         padding: 12px 30px;
         font-size: 1rem;
     }
+
     .features-section h2 {
         font-size: 2rem;
     }
@@ -228,19 +265,27 @@ h1, h2, h3, h4, h5, h6 {
     .hero-section {
         padding: 60px 0;
     }
+
     .hero-section h1 {
         font-size: 2.2rem;
     }
+
     .hero-section .lead {
         font-size: 1rem;
     }
+
     .navbar-brand {
         font-size: 1.2rem;
     }
 }
 
 @media (min-width: 1500px) {
-    .container, .container-lg, .container-md, .container-sm, .container-xl {
+
+    .container,
+    .container-lg,
+    .container-md,
+    .container-sm,
+    .container-xl {
         max-width: 1500px;
     }
 }
@@ -348,8 +393,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Responsividade para telas menores */
 @media (max-width: 992px) {
     .auth-branding-side {
-        display: none; /* Esconde a imagem em telas menores */
+        display: none;
+        /* Esconde a imagem em telas menores */
     }
+
     .auth-form-side {
         width: 100%;
     }
@@ -379,7 +426,8 @@ h1, h2, h3, h4, h5, h6 {
 .pecs-card-img {
     height: 180px;
     width: 100%;
-    object-fit: contain; /* 'contain' evita que a imagem seja cortada */
+    object-fit: contain;
+    /* 'contain' evita que a imagem seja cortada */
 }
 
 .pecs-modal-img {
@@ -390,7 +438,7 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 10px;
 }
 
-/* --- ESTILOS PARA O BOTÃO FLUTUANTE DO MODO CRISE --- */
+/* --- ESTILOS PARA O BOTÃO FLUTUANTE DO MODO CRISE (VERSÃO MAIOR) --- */
 
 .fab-crisis-button {
     position: fixed;
@@ -400,13 +448,16 @@ h1, h2, h3, h4, h5, h6 {
 
     display: flex;
     align-items: center;
-    justify-content: center; /* Garante que o ícone comece centralizado */
+    justify-content: center;
 
-    width: 60px;
-    height: 60px;
-    background-color: #f39c12; /* Laranja */
+    /* MUDANÇA AQUI: Aumentamos o tamanho */
+    width: 70px;
+    height: 70px;
+
+    background-color: #f39c12;
     color: white;
-    border-radius: 50px;
+    border-radius: 70px;
+    /* Ajustado para manter o círculo perfeito */
     text-decoration: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     overflow: hidden;
@@ -415,24 +466,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .fab-crisis-button:hover {
-    width: 200px;
+    /* MUDANÇA AQUI: Aumentamos a largura no hover */
+    width: 220px;
     background-color: #e67e22;
     text-decoration: none;
     color: white;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    justify-content: flex-start; /* Alinha o conteúdo à esquerda no hover */
-    padding-left: 20px; /* Adiciona um espaçamento interno no hover */
+    justify-content: flex-start;
+
+    /* MUDANÇA AQUI: Ajuste no padding para o novo tamanho */
+    padding-left: 23px;
 }
 
 .fab-crisis-button .fab-icon {
-    font-size: 1.5rem;
+    /* MUDANÇA AQUI: Ícone levemente maior para combinar */
+    font-size: 1.8rem;
     transition: all 0.2s ease-in-out;
 }
 
 .fab-crisis-button .fab-text {
     white-space: nowrap;
     opacity: 0;
-    /* Começa sem largura para não ocupar espaço */
     width: 0;
     margin-left: 0;
     transition: all 0.2s ease-in-out;
@@ -441,11 +495,35 @@ h1, h2, h3, h4, h5, h6 {
 
 .fab-crisis-button:hover .fab-text {
     opacity: 1;
-    width: auto; /* Permite que o texto ocupe o espaço necessário */
-    margin-left: 15px; /* Cria um espaço entre o ícone e o texto */
+    width: auto;
+    margin-left: 15px;
 }
 
 .fab-crisis-button:hover .fab-icon {
-    /* Pequeno ajuste para o ícone não "pular" tanto */
     transform: scale(1.1);
+}
+
+/* --- ESTILOS PARA A PÁGINA DE PERFIL DE APOIO --- */
+
+.form-group label {
+    font-size: 1.1rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--dark-text);
+}
+
+.form-group textarea.form-control {
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+/* Estilos específicos para o formulário de perfil */
+.form-group label {
+    font-size: 1.1rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--dark-text);
+}
+
+.form-group textarea.form-control {
+    min-height: 120px;
+    line-height: 1.6;
 }
