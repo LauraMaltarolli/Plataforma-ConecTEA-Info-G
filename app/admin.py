@@ -70,7 +70,7 @@ class PerfilApoioAdmin(admin.ModelAdmin):
 
 @admin.register(Postagem)
 class PostagemAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'usuario', 'data')
+    list_display = ('titulo', 'usuario', 'data_criacao')
     search_fields = ('titulo', 'usuario__username')
     inlines = [ComentarioInline]
 

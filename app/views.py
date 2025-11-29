@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from .mixins import UserTypeRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 class IndexView(View):
@@ -245,10 +246,99 @@ class PostagemListView(LoginRequiredMixin, UserTypeRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         postagens = Postagem.objects.all()
-        context = {
-            'postagens': postagens,
-        }
-        return render(request, self.template_name, context)
+        
+        # Filtro por categoria (opcional)
+        categoria = request.GET.get('categoria')
+        if categoria:
+            postagens = postagens.filter(categoria=categoria)
+            
+        return render(request, self.template_name, {'postagens': postagens})
+
+class PostagemCreateView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'postagem_form.html'
+    allowed_types = ['EDUCADOR', 'CUIDADOR', 'ADM']
+
+    def get(self, request, *args, **kwargs):
+        form = PostagemForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = PostagemForm(request.POST)
+        if form.is_valid():
+            postagem = form.save(commit=False)
+            postagem.usuario = request.user
+            postagem.save()
+            messages.success(request, 'Postagem criada com sucesso!')
+            return redirect('postagem_list')
+        return render(request, self.template_name, {'form': form})
+
+class PostagemDetailView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'postagem_detail.html'
+    allowed_types = ['EDUCADOR', 'CUIDADOR', 'ADM']
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        postagem = get_object_or_404(Postagem, pk=pk)
+        form_comentario = ComentarioForm()
+        return render(request, self.template_name, {
+            'postagem': postagem, 
+            'form_comentario': form_comentario
+        })
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        postagem = get_object_or_404(Postagem, pk=pk)
+        form = ComentarioForm(request.POST)
+        
+        if form.is_valid():
+            comentario = form.save(commit=False)
+            comentario.postagem = postagem
+            comentario.usuario = request.user
+            comentario.save()
+            messages.success(request, 'Comentário adicionado!')
+            return redirect('postagem_detail', pk=pk)
+            
+        return render(request, self.template_name, {
+            'postagem': postagem, 
+            'form_comentario': form
+        })
+
+class PostagemUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'postagem_form.html'
+
+    def test_func(self):
+        # Apenas o dono do post ou um Superusuário pode editar
+        postagem = get_object_or_404(Postagem, pk=self.kwargs['pk'])
+        return self.request.user == postagem.usuario or self.request.user.is_superuser
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        postagem = get_object_or_404(Postagem, pk=pk)
+        form = PostagemForm(instance=postagem)
+        return render(request, self.template_name, {'form': form, 'titulo_pagina': 'Editar Postagem'})
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        postagem = get_object_or_404(Postagem, pk=pk)
+        form = PostagemForm(request.POST, instance=postagem)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Postagem atualizada!')
+            return redirect('postagem_detail', pk=pk)
+        return render(request, self.template_name, {'form': form, 'titulo_pagina': 'Editar Postagem'})
+
+class PostagemDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        # Apenas o dono do post ou um Superusuário pode excluir
+        postagem = get_object_or_404(Postagem, pk=self.kwargs['pk'])
+        return self.request.user == postagem.usuario or self.request.user.is_superuser
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        postagem = get_object_or_404(Postagem, pk=pk)
+        postagem.delete()
+        messages.success(request, 'Postagem excluída com sucesso!')
+        return redirect('postagem_list')
 
 class GuiaInformativoListView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     template_name = 'guia_list.html'
@@ -276,7 +366,59 @@ class GuiaDetailView(LoginRequiredMixin, UserTypeRequiredMixin, View):
         guia = get_object_or_404(GuiaInformativo, pk=pk)
         context = {'guia': guia}
         return render(request, self.template_name, context)
-    
+
+class GuiaCreateView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'guia_form.html'
+    allowed_types = ['EDUCADOR', 'ADM'] # Apenas estes podem criar
+
+    def get(self, request, *args, **kwargs):
+        form = GuiaInformativoForm()
+        return render(request, self.template_name, {'form': form, 'titulo_pagina': 'Criar Novo Guia'})
+
+    def post(self, request, *args, **kwargs):
+        form = GuiaInformativoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Guia publicado com sucesso!')
+            return redirect('guia_list')
+        return render(request, self.template_name, {'form': form, 'titulo_pagina': 'Criar Novo Guia'})
+
+class GuiaUpdateView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'guia_form.html'
+    allowed_types = ['EDUCADOR', 'ADM']
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        guia = get_object_or_404(GuiaInformativo, pk=pk)
+        form = GuiaInformativoForm(instance=guia)
+        return render(request, self.template_name, {'form': form, 'titulo_pagina': f'Editar: {guia.titulo}'})
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        guia = get_object_or_404(GuiaInformativo, pk=pk)
+        form = GuiaInformativoForm(request.POST, request.FILES, instance=guia)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Guia atualizado com sucesso!')
+            return redirect('guia_list')
+        return render(request, self.template_name, {'form': form, 'titulo_pagina': f'Editar: {guia.titulo}'})
+
+class GuiaDeleteView(LoginRequiredMixin, UserTypeRequiredMixin, View):
+    template_name = 'guia_confirm_delete.html'
+    allowed_types = ['EDUCADOR', 'ADM']
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        guia = get_object_or_404(GuiaInformativo, pk=pk)
+        return render(request, self.template_name, {'guia': guia})
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        guia = get_object_or_404(GuiaInformativo, pk=pk)
+        guia.delete()
+        messages.success(request, 'Guia excluído com sucesso!')
+        return redirect('guia_list')
+
 class PECsView(LoginRequiredMixin, View):
     template_name = 'pecs.html'
 

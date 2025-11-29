@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ postagem.titulo }} - ConecTEA</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        @media (min-height: 200px) {
+            body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            main.container {
+                flex: 1 0 auto;
+            }
+            .footer {
+                flex-shrink: 0;
+                margin-top: auto;
+            }
+        }
+    </style>
+</head>
+<body class="community-bg"> <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-hand-holding-heart mr-2"></i>ConecTEA</a>
+                <div class="ml-auto">
+                    <a href="{% url 'postagem_list' %}" class="btn btn-outline-light btn-sm rounded-pill px-4 font-weight-bold">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <article class="discussion-card">
+                    
+                    <div class="post-header">
+                        <span class="badge badge-light post-category-badge border text-{{ postagem.categoria }}">
+                            {{ postagem.get_categoria_display }}
+                        </span>
+
+                        {% if user == postagem.usuario or user.is_superuser %}
+                            <div class="post-actions-float">
+                                <a href="{% url 'postagem_update' pk=postagem.pk %}" class="action-btn btn-edit-post" title="Editar">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <button class="action-btn btn-del-post" data-toggle="modal" data-target="#deletePostModal" title="Excluir">
+                                    <i class="far fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        {% endif %}
+
+                        <h1 class="post-title-main">{{ postagem.titulo }}</h1>
+
+                        <div class="author-profile">
+                            {% if postagem.usuario.imagem_perfil %}
+                                <img src="{{ postagem.usuario.imagem_perfil.url }}" class="author-img-lg" alt="Foto de {{ postagem.usuario.username }}">
+                            {% else %}
+                                <div class="author-img-lg d-flex align-items-center justify-content-center bg-light text-secondary">
+                                    <i class="fas fa-user fa-2x"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="author-details">
+                                <h6>
+                                    {{ postagem.usuario.username }}
+                                    <span class="user-role-badge badge-{{ postagem.usuario.tipo_usuario }}">
+                                        {{ postagem.usuario.get_tipo_usuario_display }}
+                                    </span>
+                                </h6>
+                                <span class="post-timestamp">
+                                    Iniciado em {{ postagem.data_criacao|date:"d de F, Y" }} às {{ postagem.data_criacao|date:"H:i" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-body">
+                        {{ postagem.conteudo|linebreaks }}
+                    </div>
+
+                    <div class="comments-container">
+                        <h5 class="font-weight-bold mb-4" style="color: #2d3436;">
+                            <i class="far fa-comments mr-2 text-primary"></i>Respostas ({{ postagem.comentarios.count }})
+                        </h5>
+
+                        {% for comentario in postagem.comentarios.all %}
+                            <div class="comment-bubble-wrapper">
+                                {% if comentario.usuario.imagem_perfil %}
+                                    <img src="{{ comentario.usuario.imagem_perfil.url }}" class="comment-avatar-sm">
+                                {% else %}
+                                    <div class="comment-avatar-sm d-flex align-items-center justify-content-center bg-white border">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </div>
+                                {% endif %}
+
+                                <div class="comment-box border-{{ comentario.usuario.tipo_usuario }}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <span class="comment-name">
+                                            {{ comentario.usuario.username }}
+                                            <span class="user-role-badge badge-{{ comentario.usuario.tipo_usuario }}" style="font-size: 0.6rem; padding: 2px 6px;">
+                                                {{ comentario.usuario.get_tipo_usuario_display }}
+                                            </span>
+                                        </span>
+                                        <small class="text-muted">{{ comentario.data|timesince }} atrás</small>
+                                    </div>
+                                    <p class="mb-0 text-secondary" style="line-height: 1.5;">{{ comentario.texto|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-4">
+                                <p class="text-muted font-italic">Nenhuma resposta ainda. Seja o primeiro a apoiar!</p>
+                            </div>
+                        {% endfor %}
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="new-comment-box d-flex flex-column">
+                                {{ form_comentario.texto }}
+                                <div class="text-right p-2">
+                                    <button type="submit" class="btn btn-primary btn-send-comment">
+                                        Publicar Resposta <i class="fas fa-paper-plane ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </article>
+
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="deletePostModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+                <div class="modal-body p-5 text-center">
+                    <div class="mb-4 text-danger bg-light rounded-circle d-inline-flex p-3">
+                        <i class="fas fa-trash-alt fa-2x"></i>
+                    </div>
+                    <h4 class="font-weight-bold mb-2">Excluir Discussão?</h4>
+                    <p class="text-muted mb-4">Tem certeza que deseja apagar "<strong>{{ postagem.titulo }}</strong>"?<br>Isso removerá também todos os comentários.</p>
+                    
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-4 mr-3 font-weight-bold" data-dismiss="modal">Cancelar</button>
+                        <form action="{% url 'postagem_delete' pk=postagem.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 font-weight-bold shadow-sm">Sim, Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2025 ConecTEA. Todos os direitos reservados. Design por Laura Maltarolli.</span>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

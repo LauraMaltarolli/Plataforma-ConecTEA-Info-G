@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+<head>
+    <title>Confirmar Exclusão - ConecTEA</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card p-5 shadow-sm border-danger">
+            <h2 class="text-danger">Confirmar Exclusão</h2>
+            <p class="lead">Você tem certeza que deseja excluir o guia "<strong>{{ guia.titulo }}</strong>"?</p>
+            <p>Esta ação não pode ser desfeita.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+                <a href="{% url 'guia_list' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

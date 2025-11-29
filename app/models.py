@@ -109,10 +109,18 @@ class Postagem(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='postagens', verbose_name="Usuário")
     titulo = models.CharField(max_length=100)
     conteudo = models.TextField()
-    data = models.DateTimeField(auto_now_add=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    CATEGORIAS = [
+        ('DUVIDA', 'Dúvida'),
+        ('RELATO', 'Relato de Experiência'),
+        ('DICA', 'Dica ou Sugestão'),
+        ('OUTRO', 'Outro'),
+    ]
+    categoria = models.CharField(max_length=20, choices=CATEGORIAS, default='OUTRO')
 
     class Meta:
-        ordering = ['-data']
+        ordering = ['-data_criacao']
         verbose_name = "Postagem"
         verbose_name_plural = "Postagens"
 

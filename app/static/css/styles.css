@@ -527,3 +527,377 @@ h6 {
     min-height: 120px;
     line-height: 1.6;
 }
+
+/* --- ESTILOS PARA GUIAS INFORMATIVOS --- */
+
+/* --- Lista de Guias (guia_list.html) --- */
+
+/* O cabeçalho colorido */
+.guide-hero {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 80px 0; /* Mais espaçamento vertical */
+    margin-bottom: 50px;
+    border-radius: 0 0 30px 30px; /* Arredondado apenas embaixo */
+    box-shadow: 0 10px 30px rgba(37, 117, 252, 0.2);
+}
+
+.guide-hero h1 {
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+/* O Card do Guia */
+.guide-card {
+    border: none;
+    border-radius: 16px;
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    overflow: hidden; /* Garante que nada saia das bordas arredondadas */
+    height: 100%; /* Garante que todos os cards tenham a mesma altura na linha */
+}
+
+.guide-card:hover {
+    transform: translateY(-8px); /* Sobe um pouco mais */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* O container da imagem no card */
+.guide-card-img-wrapper {
+    height: 220px; /* Altura FIXA para todas as imagens de capa */
+    width: 100%;
+    position: relative;
+    background-color: #f1f3f5;
+    overflow: hidden;
+}
+
+/* A imagem dentro do card */
+.guide-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Corta a imagem para preencher sem distorcer */
+    transition: transform 0.5s ease;
+}
+
+.guide-card:hover .guide-card-img {
+    transform: scale(1.08); /* Zoom suave ao passar o mouse */
+}
+
+/* A "Etiqueta" do público alvo */
+.guide-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #2575fc;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+/* Corpo do Card */
+.guide-card .card-body {
+    padding: 25px; /* Mais respiro interno */
+}
+
+.guide-card .card-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* --- Detalhes do Guia (guia_detail.html) --- */
+
+/* Cabeçalho do Artigo */
+.article-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.article-header h1 {
+    font-weight: 800;
+    color: #2c3e50;
+    margin-top: 15px;
+}
+
+.article-meta {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-top: 10px;
+}
+
+/* Imagem Principal do Artigo */
+.article-image {
+    width: 100%;
+    max-height: 500px; /* Limita a altura para não ocupar a tela toda */
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin-bottom: 50px; /* Espaço antes do texto começar */
+}
+
+/* Conteúdo do Texto */
+.article-content {
+    font-family: 'Georgia', 'Merriweather', serif; /* Fonte serifada para leitura longa */
+    font-size: 1.2rem; /* Texto maior */
+    line-height: 1.9; /* Mais espaço entre as linhas */
+    color: #343a40;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem; /* Espaço entre parágrafos */
+}
+
+/* Cartão de Link Externo */
+.article-link-card {
+    background-color: #f8f9fa;
+    border-left: 6px solid #2575fc;
+    padding: 30px;
+    margin-top: 50px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* Formulário de Busca na Hero Section */
+.guide-hero .form-control {
+    padding: 25px 20px; /* Campo de busca mais alto */
+    font-size: 1.1rem;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.guide-hero .btn-light {
+    padding: 0 30px;
+    font-weight: bold;
+    color: #2575fc;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* =========================================
+   ESTILOS DA COMUNIDADE (FÓRUM)
+   ========================================= */
+
+/* Fundo da página mais suave */
+.community-bg {
+    background-color: #f4f7f6;
+    background-image: radial-gradient(circle at 10% 20%, rgba(0, 123, 255, 0.03) 0%, transparent 20%),
+                      radial-gradient(circle at 90% 80%, rgba(40, 167, 69, 0.03) 0%, transparent 20%);
+}
+
+/* O "Papel" Principal - Nada quadrado aqui! */
+.discussion-card {
+    background: #ffffff;
+    border-radius: 30px; /* Bordas bem redondas */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04); /* Sombra suave e profunda */
+    border: none;
+    overflow: visible; /* Permite elementos flutuando */
+    margin-bottom: 40px;
+    position: relative;
+}
+
+/* --- Cabeçalho do Post --- */
+.post-header {
+    padding: 40px 50px 20px 50px;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.post-category-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Título */
+.post-title-main {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: #2d3436;
+    line-height: 1.3;
+    margin-bottom: 20px;
+}
+
+/* Área do Autor */
+.author-profile {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.author-img-lg {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px; /* Avatar quadrado arredondado (Squircle) - super moderno */
+    object-fit: cover;
+    margin-right: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.author-details h6 {
+    font-weight: 700;
+    margin: 0;
+    color: #2d3436;
+    font-size: 1rem;
+}
+
+.post-timestamp {
+    font-size: 0.8rem;
+    color: #a4b0be;
+    margin-top: 3px;
+    display: block;
+}
+
+/* Selos de Cargo (Badges) */
+.user-role-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* Cores Pastéis Modernas para os Cargos */
+.badge-ADM { background-color: #2d3436; color: #fff; box-shadow: 0 2px 5px rgba(45, 52, 54, 0.3); }
+.badge-EDUCADOR { background-color: #e3f2fd; color: #0984e3; }
+.badge-CUIDADOR { background-color: #e8f5e9; color: #00b894; }
+.badge-TEA { background-color: #fff8e1; color: #f1c40f; }
+
+/* Botões de Ação (Editar/Excluir) Flutuantes */
+.post-actions-float {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #636e72;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+    text-decoration: none !important;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-edit-post:hover { background: #74b9ff; color: #fff; }
+.btn-del-post:hover { background: #ff7675; color: #fff; }
+
+/* --- Conteúdo do Texto --- */
+.post-body {
+    padding: 40px 50px;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #4b6584;
+    font-family: 'Merriweather', serif; /* Fonte serifada para leitura confortável */
+}
+
+/* --- Área de Comentários (Estilo Chat) --- */
+.comments-container {
+    background-color: #f8fbfd; /* Fundo diferente para separar visualmente */
+    padding: 40px 50px;
+    border-radius: 0 0 30px 30px;
+    border-top: 1px dashed #d1d8e0;
+}
+
+.comment-bubble-wrapper {
+    display: flex;
+    margin-bottom: 30px;
+    animation: fadeIn 0.5s ease;
+}
+
+.comment-avatar-sm {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    object-fit: cover;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.comment-box {
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 0 20px 20px 20px; /* Borda estilo balão */
+    box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+    flex-grow: 1;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+/* Cores da borda lateral do comentário baseada no cargo */
+.border-ADM { border-left: 4px solid #2d3436; }
+.border-EDUCADOR { border-left: 4px solid #0984e3; }
+.border-CUIDADOR { border-left: 4px solid #00b894; }
+.border-TEA { border-left: 4px solid #f1c40f; }
+
+.comment-name {
+    font-weight: 700;
+    color: #2d3436;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Formulário de Comentário */
+.new-comment-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+    margin-top: 20px;
+    border: 1px solid #e1e1e1;
+}
+
+.new-comment-box textarea {
+    border: none;
+    box-shadow: none !important;
+    resize: none;
+    padding: 15px;
+    font-size: 1rem;
+    background: transparent;
+}
+
+.btn-send-comment {
+    border-radius: 50px;
+    padding: 8px 30px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .post-header, .post-body, .comments-container { padding: 30px 20px; }
+    .post-title-main { font-size: 1.5rem; }
+    .post-actions-float { position: static; margin-bottom: 20px; }
+}

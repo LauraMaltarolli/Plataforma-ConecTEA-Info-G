@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Comunidade - ConecTEA</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        @media (min-height: 200px) {
+            body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            main.container {
+                flex: 1 0 auto;
+            }
+            .footer {
+                flex-shrink: 0;
+                margin-top: auto;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: #f4f6f9;">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'index' %}"><i class="fas fa-hand-holding-heart mr-2"></i>ConecTEA</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mr-auto">
+                        {% if user.is_authenticated %}
+                            
+                            {% if user.tipo_usuario == 'TEA' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'pecs' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'perfil_hub' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                            {% endif %}
+                            
+                            {% if user.tipo_usuario == 'EDUCADOR' or user.tipo_usuario == 'CUIDADOR' or user.tipo_usuario == 'ADM' %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'guia_list' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'postagem_list' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
+                            {% endif %}
+
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-comments mr-1"></i>Comunicação (PECS)</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-book-open mr-1"></i>Guias</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-users mr-1"></i>Comunidade</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-user-circle mr-1"></i>Perfil de Apoio</a></li>
+                        {% endif %}
+                    </ul>
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><span class="nav-link"><i class="fas fa-user mr-1"></i>Olá, {{ user.username }}</span></li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt mr-1"></i>Sair
+                                </a>
+                            </li>
+                            {% if user.is_superuser %}
+                                <li class="nav-item"><a class="nav-link" href="/admin/"><i class="fas fa-user-shield mr-1"></i>Admin</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt mr-1"></i>Entrar</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="community-hero">
+        <div class="container">
+            <h1><i class="fas fa-comments mr-3"></i>Comunidade ConecTEA</h1>
+            <p class="lead">Troque experiências, tire dúvidas e conecte-se com outros cuidadores e educadores.</p>
+        </div>
+    </div>
+
+    <main class="container mb-5">
+        <div class="row">
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <a href="{% url 'postagem_create' %}" class="btn btn-primary btn-block mb-3 shadow-sm">
+                            <i class="fas fa-plus-circle mr-2"></i>Nova Discussão
+                        </a>
+                        <hr>
+                        <h6 class="text-muted font-weight-bold mb-3">FILTRAR POR</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'postagem_list' %}" class="list-group-item list-group-item-action border-0 pl-0">
+                                <i class="fas fa-globe mr-2 text-secondary"></i> Todas
+                            </a>
+                            <a href="?categoria=DUVIDA" class="list-group-item list-group-item-action border-0 pl-0">
+                                <i class="fas fa-question-circle mr-2 text-warning"></i> Dúvidas
+                            </a>
+                            <a href="?categoria=RELATO" class="list-group-item list-group-item-action border-0 pl-0">
+                                <i class="fas fa-heart mr-2 text-info"></i> Relatos
+                            </a>
+                            <a href="?categoria=DICA" class="list-group-item list-group-item-action border-0 pl-0">
+                                <i class="fas fa-lightbulb mr-2 text-success"></i> Dicas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success shadow-sm">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                {% for post in postagens %}
+                    <div class="card post-card cat-{{ post.categoria }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge badge-light border mb-2">{{ post.get_categoria_display }}</span>
+                                    <h4 class="card-title">
+                                        <a href="{% url 'postagem_detail' pk=post.pk %}" class="text-dark text-decoration-none">
+                                            {{ post.titulo }}
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div class="text-center text-muted ml-3" style="min-width: 60px;">
+                                    <i class="far fa-comment-alt fa-lg d-block mb-1"></i>
+                                    <small>{{ post.comentarios.count }}</small>
+                                </div>
+                            </div>
+                            
+                            <p class="card-text text-muted">{{ post.conteudo|truncatewords:30 }}</p>
+                            
+                            <div class="d-flex align-items-center mt-3 post-meta">
+                                {% if post.usuario.imagem_perfil %}
+                                    <img src="{{ post.usuario.imagem_perfil.url }}" class="rounded-circle mr-2" width="25" height="25">
+                                {% else %}
+                                    <i class="fas fa-user-circle fa-lg mr-2 text-secondary"></i>
+                                {% endif %}
+                                <span class="mr-3">{{ post.usuario.username }}</span>
+                                <span><i class="far fa-clock mr-1"></i> {{ post.data_criacao|timesince }} atrás</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                        <h3>Nenhuma discussão encontrada.</h3>
+                        <p class="text-muted">Seja o primeiro a iniciar uma conversa!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2025 ConecTEA. Todos os direitos reservados. Design por Laura Maltarolli.</span>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
