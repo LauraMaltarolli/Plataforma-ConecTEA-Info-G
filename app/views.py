@@ -226,18 +226,30 @@ class ItemRotinaDeleteView(LoginRequiredMixin, View):
 
 class SalvarOrdemItensView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     allowed_types = ['TEA', 'CUIDADOR', 'ADM']
-    @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
-            # Pega a lista de IDs ordenada enviada pelo JavaScript
-            item_ids = json.loads(request.body).get('item_ids', [])
+            # Pega a lista de IDs enviada pelo JavaScript
+            data = json.loads(request.body)
+            item_ids = data.get('item_ids', [])
             
-            for index, item_id in enumerate(item_ids):
-                # Para cada item na lista, atualiza o campo 'ordem'
-                ItemRotina.objects.filter(id=item_id, rotina__usuario=request.user).update(ordem=index)
+            # Debug: Mostra no seu terminal o que chegou (para conferir)
+            print(f"Salvando ordem para os itens: {item_ids}")
+
+            # Transaction atomic garante que ou salva tudo, ou não salva nada (segurança)
+            with transaction.atomic():
+                for index, item_id in enumerate(item_ids):
+                    # ATENÇÃO: AQUI ESTAVA O PROVÁVEL ERRO
+                    # Agora filtramos pelo caminho correto: Item -> Rotina -> Perfil -> Gerente
+                    ItemRotina.objects.filter(
+                        id=item_id, 
+                        rotina__perfil_apoio__gerente=request.user
+                    ).update(ordem=index)
             
             return JsonResponse({'status': 'success', 'message': 'Ordem salva com sucesso!'})
+
         except Exception as e:
+            # Se der erro, ele vai aparecer no seu terminal do VS Code
+            print(f"ERRO AO SALVAR ORDEM: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 class PostagemListView(LoginRequiredMixin, UserTypeRequiredMixin, View):
@@ -378,6 +390,8 @@ class GuiaCreateView(LoginRequiredMixin, UserTypeRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = GuiaInformativoForm(request.POST, request.FILES)
         if form.is_valid():
+            guia = form.save(commit=False)
+            guia.autor = request.user
             form.save()
             messages.success(request, 'Guia publicado com sucesso!')
             return redirect('guia_list')
@@ -434,7 +448,7 @@ class PECsView(LoginRequiredMixin, View):
         if request.user.is_superuser:
             pecs_a_exibir = PECs.objects.filter(base_query).order_by('texto')
         else:
-            pecs_a_exibir = PECs.objects.filter(base_query, is_crisis_card=False).order_by('texto')
+            pecs_a_exibir = PECs.objects.filter(base_query).order_by('texto')
         
         context = {'pecs_list': pecs_a_exibir}
         return render(request, self.template_name, context)

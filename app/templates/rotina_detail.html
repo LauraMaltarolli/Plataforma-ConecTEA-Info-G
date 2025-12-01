@@ -11,60 +11,54 @@
     <style>
         .item-card {
             background-color: #fff;
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border-light, #ddd);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
+            /* O cursor indica que pode arrastar */
+            cursor: grab;
+        }
+        .item-card:active {
+            cursor: grabbing;
+        }
+        /* Classe visual adicionada enquanto arrasta (pelo SortableJS) */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
         }
         .item-card .drag-handle {
-            font-size: 1.5rem; /* Ícone um pouco maior */
-            color: #B0BEC5;   /* Cor mais suave */
+            font-size: 1.5rem;
+            color: #B0BEC5;
             margin-right: 15px;
-            padding: 10px; /* AUMENTANDO A ÁREA CLICÁVEL */
+            padding: 5px 10px;
             cursor: grab;
             transition: color 0.2s ease;
         }
         .item-card .drag-handle:hover {
             color: #78909C;
         }
-        .item-card:active { cursor: grabbing; }
-        .item-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
+        .item-card img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
         .delete-item-btn {
             font-size: 1.2rem;
             padding: 5px 10px;
         }
+        
+        /* Footer fixo no final se a página for curta */
         @media (min-height: 200px) {
-            body {
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-            }
-            main.container {
-                flex: 1 0 auto;
-            }
-            .footer {
-                flex-shrink: 0;
-                margin-top: auto;
-            }
+            body { display: flex; flex-direction: column; min-height: 100vh; }
+            main.container { flex: 1 0 auto; }
+            .footer { flex-shrink: 0; margin-top: auto; }
         }
-
-        .item-card {
-            background-color: #fff;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            cursor: grab;
-            display: flex;
-            align-items: center;
-        }
-        .item-card:active { cursor: grabbing; }
-        .item-card .drag-handle { font-size: 1.2rem; color: #ccc; margin-right: 15px; }
-        .item-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
     </style>
 </head>
 <body>
@@ -117,8 +111,20 @@
     </header>
 
     <main class="container mt-5">
-        <div class="card mb-4">
-            <div class="card-header"><h5>Adicionar Novo Item à Rotina</h5></div>
+        
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h2>{{ rotina.titulo }}</h2>
+                {% if rotina.descricao %}
+                    <p class="text-muted">{{ rotina.descricao }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Adicionar Novo Item</h5>
+            </div>
             <div class="card-body">
                 <form id="add-item-form" action="{% url 'item_create' pk=rotina.pk %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -142,29 +148,35 @@
         </div>
 
         <hr>
-        <h3 class="mb-3">Itens da Rotina (Arraste para reordenar)</h3>
+        <h4 class="mb-3 text-secondary"><i class="fas fa-sort mr-2"></i>Itens da Rotina (Arraste para organizar)</h4>
 
         <div id="item-list">
-            {% for item in rotina.itens.all %}
-                <div class="item-card" id="item-{{ item.id }}">
+            {% for item in rotina.itens.all|dictsort:"ordem" %}
+                <div class="item-card" data-id="{{ item.id }}">
                     <span class="drag-handle"><i class="fas fa-grip-vertical"></i></span>
+                    
                     {% if item.imagem %}
                         <img src="{{ item.imagem.url }}" alt="{{ item.descricao }}">
+                    {% else %}
+                        <div class="rounded mr-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="fas fa-image text-secondary"></i>
+                        </div>
                     {% endif %}
-                    <div class="flex-grow-1">{{ item.descricao }}</div>
                     
-                    <form action="{% url 'item_delete' pk=item.id %}" method="post" class="ml-2">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-sm text-danger delete-item-btn" 
+                    <div class="flex-grow-1 font-weight-bold">{{ item.descricao }}</div>
+                    
+                    <button type="button" class="btn btn-sm text-danger delete-item-btn" 
                             data-toggle="modal" 
                             data-target="#deleteItemConfirmModal" 
                             data-url="{% url 'item_delete' pk=item.id %}">
-                        <i class="fas fa-times"></i>
+                        <i class="fas fa-trash-alt"></i>
                     </button>
-                    </form>
                 </div>
             {% empty %}
-                <p id="no-items-message">Esta rotina ainda não tem itens. Adicione o primeiro usando o formulário acima!</p>
+                <div id="no-items-message" class="text-center py-5 text-muted">
+                    <i class="fas fa-tasks fa-2x mb-3"></i>
+                    <p>Esta rotina ainda não tem itens. Adicione o primeiro acima!</p>
+                </div>
             {% endfor %}
         </div>
     </main>
@@ -173,13 +185,11 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Exclusão</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title">Excluir Item</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>Você tem certeza que deseja excluir este item da rotina?</p>
+                    <p>Tem certeza que deseja excluir este item da rotina?</p>
                 </div>
                 <div class="modal-footer">
                     <form id="delete-item-confirm-form" method="post" action="">
@@ -197,7 +207,6 @@
         <span class="fab-text">Modo Crise</span>
     </a>
 
-
     <footer class="footer">
         <div class="container">
             <span>&copy; 2025 ConecTEA. Todos os direitos reservados. Design por Laura Maltarolli.</span>
@@ -205,9 +214,80 @@
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{% static 'js/rotina_detail.js' %}"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var csrfToken = '{{ csrf_token }}'; // Pega o token do Django
+
+            // --- 1. CONFIGURAÇÃO DO SORTABLE (Arrastar e Soltar) ---
+            var el = document.getElementById('item-list');
+            if (el) {
+                var sortable = Sortable.create(el, {
+                    animation: 150,
+                    handle: '.drag-handle', // Só arrasta pelo ícone
+                    ghostClass: 'sortable-ghost', // Classe visual ao arrastar
+                    
+                    // EVENTO: Disparado quando o usuário SOLTA o item na nova posição
+                    onEnd: function (evt) {
+                        var itemIds = [];
+                        
+                        // Varre a lista visual para pegar a nova ordem dos IDs
+                        $('#item-list .item-card').each(function() {
+                            // Pega o ID que colocamos no data-id
+                            itemIds.push($(this).data('id'));
+                        });
+
+                        // Envia a nova lista de IDs para o servidor salvar
+                        $.ajax({
+                            url: "{% url 'salvar_ordem_itens' %}", // URL gerada pelo Django
+                            method: "POST",
+                            data: JSON.stringify({ item_ids: itemIds }),
+                            contentType: "application/json",
+                            headers: { "X-CSRFToken": csrfToken },
+                            success: function(response) {
+                                console.log("Ordem salva com sucesso!");
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Erro ao salvar ordem:", error);
+                                alert("Erro ao salvar a ordem. Tente recarregar a página.");
+                            }
+                        });
+                    }
+                });
+            }
+
+            // --- 2. ADICIONAR ITEM (AJAX) ---
+            $('#add-item-form').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var formData = new FormData(this);
+                var url = form.attr('action');
+                
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        location.reload(); // Recarrega para mostrar o item na lista
+                    },
+                    error: function(xhr) {
+                        alert('Erro ao adicionar: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // --- 3. CONFIGURAR O MODAL DE EXCLUSÃO ---
+            $('#item-list').on('click', '.delete-item-btn', function() {
+                var url = $(this).data('url');
+                $('#delete-item-confirm-form').attr('action', url);
+            });
+        });
+    </script>
 </body>
 </html>

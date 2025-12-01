@@ -109,11 +109,6 @@
             </div>
 
             <div class="col-lg-9">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-success shadow-sm">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
 
                 {% for post in postagens %}
                     <div class="card post-card cat-{{ post.categoria }}">
@@ -155,6 +150,12 @@
                 {% endfor %}
             </div>
         </div>
+        {% if user.is_authenticated and user.tipo_usuario != 'EDUCADOR' %}
+        <a href="{% url 'modo_crise' %}" class="fab-crisis-button">
+            <i class="fas fa-exclamation-triangle fab-icon"></i>
+            <span class="fab-text">Modo Crise</span>
+        </a>
+    {% endif %}
     </main>
 
     <footer class="footer">

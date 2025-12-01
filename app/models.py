@@ -45,7 +45,7 @@ class PerfilApoio(models.Model):
         verbose_name_plural = "Perfis de Apoio"
 
     def __str__(self):
-        return f"Perfil de Apoio de {self.usuario.username}"
+        return self.nome_perfil
 
 class Rotina(models.Model):
     perfil_apoio = models.ForeignKey(PerfilApoio, on_delete=models.CASCADE, related_name='rotinas')
@@ -89,6 +89,7 @@ class PECs(models.Model):
         return self.texto
 
 class GuiaInformativo(models.Model):
+    autor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='guias_criados', verbose_name="Autor")
     titulo = models.CharField(max_length=100, verbose_name="Título")
     descricao = models.TextField(verbose_name="Conteúdo do Guia")
     link = models.URLField(max_length=255, blank=True, null=True, verbose_name="Link Externo (Opcional)")

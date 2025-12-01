@@ -80,7 +80,7 @@
                                     </span>
                                 </h6>
                                 <span class="post-timestamp">
-                                    Iniciado em {{ postagem.data_criacao|date:"d de F, Y" }} às {{ postagem.data_criacao|date:"H:i" }}
+                                    Iniciado em {{ postagem.data_criacao}}
                                 </span>
                             </div>
                         </div>
@@ -141,6 +141,13 @@
 
             </div>
         </div>
+
+        {% if user.is_authenticated and user.tipo_usuario != 'EDUCADOR' %}
+        <a href="{% url 'modo_crise' %}" class="fab-crisis-button">
+            <i class="fas fa-exclamation-triangle fab-icon"></i>
+            <span class="fab-text">Modo Crise</span>
+        </a>
+    {% endif %}
     </main>
 
     <div class="modal fade" id="deletePostModal" tabindex="-1" role="dialog">

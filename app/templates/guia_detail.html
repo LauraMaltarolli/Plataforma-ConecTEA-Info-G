@@ -67,7 +67,9 @@
                     <span class="badge badge-primary px-3 py-2 mb-3">{{ guia.publico_alvo }}</span>
                     <h1 class="display-4 font-weight-bold">{{ guia.titulo }}</h1>
                     <div class="article-meta">
-                        <span><i class="far fa-calendar-alt mr-2"></i>Publicado em {{ guia.data_criacao|date:"d de F de Y" }}</span>
+                        <span class="mr-3"><i class="fas fa-user-edit mr-1"></i> Por {{ guia.autor.username }}</span>
+                        
+                        <span><i class="far fa-calendar-alt mr-1"></i> {{ guia.data_criacao|date:"d de F de Y" }}</span>
                     </div>
                 </div>
 
@@ -96,7 +98,14 @@
 
             </div>
         </div>
+        {% if user.is_authenticated and user.tipo_usuario != 'EDUCADOR' %}
+        <a href="{% url 'modo_crise' %}" class="fab-crisis-button">
+            <i class="fas fa-exclamation-triangle fab-icon"></i>
+            <span class="fab-text">Modo Crise</span>
+        </a>
+    {% endif %}
     </main>
+    
 
     <footer class="footer">
         <div class="container">
